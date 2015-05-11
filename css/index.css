@@ -1,0 +1,29 @@
+.categorie {
+    cursor: pointer;
+}
+
+.cache {
+    display: none;
+}
+
+#suivante {
+    cursor: pointer;
+}
+
+#precedente {
+    cursor: pointer;
+}
+
+#images em[data-a] {
+    cursor: pointer;
+}
+
+.fav {
+    background: url('fav.png') no-repeat;
+    display: block;
+}
+
+.nofav {
+    background: url('nofav.png') no-repeat;
+    display: block;
+}
