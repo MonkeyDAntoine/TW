@@ -17,7 +17,7 @@ CREATE TABLE photos (
   pho_url          VARCHAR(255)       NOT NULL,
   pho_hauteur      SMALLINT           NOT NULL,
   pho_largeur      SMALLINT           NOT NULL,
-  pho_type_licence BOOL [4]           NOT NULL, -- by,sa,nd,nc
+  pho_type_licence BOOL [4]           NOT NULL, -- BY,NC,ND,SA
   pho_titre        VARCHAR(255)       NOT NULL,
   pho_date_ajout   TIMESTAMP          NOT NULL DEFAULT current_timestamp
 );
@@ -52,20 +52,21 @@ DROP FUNCTION IF EXISTS getCategories( INTEGER [] );
 CREATE OR REPLACE FUNCTION getCategories(INTEGER [])
   RETURNS INTEGER [] AS $$
 DECLARE
+  param_categories ALIAS FOR $1;
   categorie       INT;
   sc              INT;
   resultat        INT [];
   sous_categories INT [];
 BEGIN
-  FOREACH categorie IN ARRAY $1
+  FOR cat IN 1..array_upper(param_categories,1)
   LOOP
 --resultat := array_append(resultat, categorie);
-    sous_categories := getCategories(categorie);
+    sous_categories := getCategories(param_categories[cat]);
     IF (sous_categories IS NOT NULL)
     THEN
-      FOREACH sc IN ARRAY sous_categories
+      FOR sc IN 1..array_upper(sous_categories)
       LOOP
-        resultat := array_append(resultat, sc);
+        resultat := array_append(resultat, sous_categories[sc]);
       END LOOP;
     END IF;
   END LOOP;
