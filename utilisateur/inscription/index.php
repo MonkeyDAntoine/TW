@@ -1,10 +1,15 @@
 <?php
 require_once "../../php/connectionBDD.php";
 
-$login = $_GET['login'];
-$mdp = $_GET['mdp'];
+$login = $_POST['login'];
+$mdp = $_POST['mdp'];
+$mdpbis = $_POST['mdpbis'];
 
 $messages = validerLoginMotDePasse($login, $mdp);
+
+if (!empty($mdpbis)  && (empty($mdp) || $mdpbis != $mdp)) {
+    array_push($messages['erreurs'], 'Le mot de passe de confirmation est incorrect');
+}
 
 if (empty($messages['erreurs'])) {
     $loginExiste = "

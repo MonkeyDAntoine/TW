@@ -13,7 +13,15 @@ function ajax(method, url, success, data) {
     };
 
     console.log('URL', url);
-    xhr.send(data);
+
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    if (data) {
+        xhr.send(data.join('&'));
+    }
+    else {
+        xhr.send();
+    }
 }
 
 function afficher(rep) {
@@ -28,7 +36,7 @@ function afficher(rep) {
         var infosSpan = document.createElement('span');
         var imgImg = document.createElement('img');
         var motscles = document.createElement('span');
-        infosSpan.innerHTML = img['title'] + ' by ';
+        infosSpan.innerHTML = img['title'] + ' (' + img['size'] + ')';
 
         if (img['url_author'].length > 0) {
             var consulterImgAuteur = document.createElement('em');
@@ -37,7 +45,7 @@ function afficher(rep) {
             consulterImgAuteur.onclick = function () {
                 afficherImages({'author': this.dataset['a']});
             };
-            infosSpan.innerHTML += '<a href="' + img['url_author'] + '" target="_blank" >' + img['author'] + '</a>';
+            infosSpan.innerHTML += ' by <a href="' + img['url_author'] + '" target="_blank" >' + img['author'] + '</a>';
             infosSpan.appendChild(consulterImgAuteur);
         }
         else {
@@ -47,31 +55,59 @@ function afficher(rep) {
         imgImg.setAttribute('url', img['url']);
         imgImg.classList.add('vignette');
 
-        for (var m in img['keywords']) {
-            motscles.innerHTML += '#' + img['keywords'][m] + ' ';
+        if (img['keywords'] && img['keywords'].length > 0) {
+            for (var m in img['keywords']) {
+                if (img['keywords'][m].length > 0) {
+                    motscles.innerHTML += '#' + img['keywords'][m] + ' ';
+                }
+            }
         }
+
+        var licence = document.createElement('span');
+        licence.classList.add('licence');
+
+        if (img['licence'] && img['licence'].length > 0) {
+            var types = img['licence'].toLowerCase().split('-');
+            for (var t in types) {
+                var cc = document.createElement('img');
+                cc.classList.add('cc');
+                cc.setAttribute('src', 'css/' + types[t] + '.png');
+                licence.appendChild(cc);
+            }
+        }
+
         var container = document.createElement('div');
+
         container.appendChild(infosSpan);
         container.appendChild(imgImg);
+        container.appendChild(licence);
         container.appendChild(motscles);
 
         if (img['favorite'] !== undefined) {
             var fav = document.createElement('img');
             fav.setAttribute('src', img['favorite'] ? 'css/fav.png' : 'css/nofav.png');
-            fav.onclick = function() {
-                var vignette = fav.parentElement.getElementsByClassName('vignette')[0];
-                ajax('GET', 'utilisateur/favoris/ajouter?vignette='+vignette, function() {
-                    this.setAttribute('src', 'css/fav.png');
-                });
+            fav.onclick = function () {
+                var $this = this;
+                var vignette = this.parentElement.getElementsByClassName('vignette')[0];
+                if ($this.getAttribute('src') == 'css/fav.png') {
+                    ajax('GET', 'utilisateur/favoris/supprimer?vignette=' + vignette.getAttribute('src'), function () {
+                        $this.setAttribute('src', 'css/nofav.png');
+                    });
+                }
+                else {
+                    ajax('GET', 'utilisateur/favoris/ajouter?vignette=' + vignette.getAttribute('src'), function () {
+                        $this.setAttribute('src', 'css/fav.png');
+                    });
+                }
             }
-            container.appendChild(fav);
+            container.insertBefore(fav,infosSpan);
         }
 
         imgDiv.appendChild(container);
 
         imgImg.onclick = function () {
             window.open(this.getAttribute('url'), 'targetWindow',
-                'toolbar=no,location = no,status = no,menubar = no,scrollbars = yes,resizable = yes');
+                'toolbar=no,location = yes,status = no,menubar = no,scrollbars = yes,resizable = yes');
         }
     }
 
@@ -169,5 +205,166 @@ window.onload = function () {
             afficherImages(FILTRE_IMAGE);
         }
     }
-}
-;
+
+    var connectionForm = document.forms['connectionForm'];
+    var inscriptionForm = document.forms['inscriptionForm'];
+    var $messages = document.getElementById('messages');
+
+    if (connectionForm) {
+        connectionForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var $param = new Array();
+            $param.push('login=' + connectionForm.login.value);
+            $param.push('mdp=' + connectionForm.mdp.value);
+            ajax(connectionForm.method, connectionForm.action, function (resp) {
+                    var $rep = JSON.parse(resp);
+                    if ($rep['erreurs'].length == 0) {
+                        document.location.reload();
+                    }
+                    else {
+                        $messages.innerHTML = '';
+                        for (var m in $rep['erreurs']) {
+                            $messages.innerHTML += $rep['erreurs'][m] + '<br>';
+                        }
+                    }
+                }, $param
+            );
+            return false;
+        });
+    }
+
+    if (inscriptionForm) {
+        inscriptionForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var $param = new Array();
+            $param.push('login=' + inscriptionForm.login.value);
+            $param.push('mdp=' + inscriptionForm.mdp.value);
+            $param.push('mdpbis=' + inscriptionForm.mdpbis.value);
+            ajax(inscriptionForm.method, inscriptionForm.action, function (resp) {
+                    var $rep = JSON.parse(resp);
+                    if ($rep['erreurs'].length == 0) {
+                        $messages.innerHTML = 'inscription résussie veuillez vous connecter !';
+                        inscriptionForm.login.value = '';
+                        inscriptionForm.mdp.value = '';
+                        inscriptionForm.mdpbis.value = '';
+                    }
+                    else {
+                        $messages.innerHTML = '';
+                        for (var m in $rep['erreurs']) {
+                            $messages.innerHTML += $rep['erreurs'][m] + '<br>';
+                        }
+                    }
+                }, $param
+            );
+            return false;
+        });
+    }
+
+    var deconnectionForm = document.forms['deconnectionForm'];
+    if (deconnectionForm) {
+        deconnectionForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            ajax(deconnectionForm.method, deconnectionForm.action, function (resp) {
+                    document.location.reload();
+                }
+            );
+            return false;
+        });
+    }
+
+    var listeLogins = document.getElementById('utilisateurs');
+    var limitLogin = 10;
+    var page_login = 1;
+
+    if (listeLogins) {
+        var logins_suivants = document.getElementById('logins_suivants');
+        var logins_precedents = document.getElementById('logins_precedents');
+
+        if (logins_suivants) {
+            logins_suivants.onclick = function () {
+                page_login++;
+                ajax('GET', 'utilisateur/?limit=' + limitLogin + '&from=' + (page_login * limitLogin), function (resp) {
+                    var logins = JSON.parse(resp);
+                    var liste = document.createElement('ul');
+                    for (var i in logins) {
+                        var li = document.createElement('li');
+                        li.innerHTML = logins[i];
+                        liste.appendChild(li);
+                        li.onclick = function () {
+                            afficherImages({'collection': this.innerHTML});
+                        }
+                    }
+                    listeLogins.innerHTML = '';
+                    listeLogins.appendChild(liste);
+
+                    if (logins.length < limitLogin) {
+                        logins_suivants.classList.add('cache');
+                    }
+                    else {
+                        logins_suivants.classList.remove('cache');
+                    }
+                    if (page_login == 0) {
+                        logins_precedents.classList.add('cache');
+                    }
+                    else {
+                        logins_precedents.classList.remove('cache');
+                    }
+                });
+            }
+        }
+
+
+        if (logins_precedents) {
+            logins_precedents.classList.add('cache');
+            logins_precedents.onclick = function () {
+                page_login--;
+                if (page_login < 0) {
+                    page_login = 0;
+                }
+                ajax('GET', 'utilisateur/?limit=' + limitLogin + '&from=' + (page_login * limitLogin), function (resp) {
+                    var logins = JSON.parse(resp);
+                    var liste = document.createElement('ul');
+                    for (var i in logins) {
+                        var li = document.createElement('li');
+                        li.innerHTML = logins[i];
+                        liste.appendChild(li);
+                        li.onclick = function () {
+                            afficherImages({'collection': this.innerHTML});
+                        }
+                    }
+                    listeLogins.innerHTML = '';
+                    listeLogins.appendChild(liste);
+
+                    if (logins.length < limitLogin) {
+                        logins_suivants.classList.add('cache');
+                    }
+                    else {
+                        logins_suivants.classList.remove('cache');
+                    }
+                    if (page_login == 0) {
+                        logins_precedents.classList.add('cache');
+                    }
+                    else {
+                        logins_precedents.classList.remove('cache');
+                    }
+                });
+            }
+        }
+
+        ajax('GET', 'utilisateur/?limit=' + limitLogin, function (resp) {
+                var logins = JSON.parse(resp);
+                var liste = document.createElement('ul');
+                for (var i in logins) {
+                    var li = document.createElement('li');
+                    li.innerHTML = logins[i];
+                    liste.appendChild(li);
+                    li.onclick = function () {
+                        afficherImages({'collection': this.innerHTML});
+                    }
+                }
+                listeLogins.innerHTML = '';
+                listeLogins.appendChild(liste);
+            }
+        );
+    }
+};

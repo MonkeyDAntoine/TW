@@ -15,9 +15,10 @@ CREATE TABLE photos (
   pho_nom_auteur   VARCHAR(255)       NOT NULL,
   pho_url_auteur   VARCHAR(255),
   pho_url          VARCHAR(255)       NOT NULL,
+  pho_mime_type    VARCHAR(255)       NOT NULL,
   pho_hauteur      SMALLINT           NOT NULL,
   pho_largeur      SMALLINT           NOT NULL,
-  pho_type_licence BOOL [4]           NOT NULL, -- BY,NC,ND,SA
+  pho_type_licence BOOL [4]           NOT NULL, -- by,sa,nd,nc
   pho_titre        VARCHAR(255)       NOT NULL,
   pho_date_ajout   TIMESTAMP          NOT NULL DEFAULT current_timestamp
 );
@@ -64,7 +65,7 @@ BEGIN
     sous_categories := getCategories(param_categories[cat]);
     IF (sous_categories IS NOT NULL)
     THEN
-      FOR sc IN 1..array_upper(sous_categories)
+      FOR sc IN 1..array_upper(sous_categories,1)
       LOOP
         resultat := array_append(resultat, sous_categories[sc]);
       END LOOP;

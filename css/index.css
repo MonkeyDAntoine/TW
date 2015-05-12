@@ -6,15 +6,7 @@
     display: none;
 }
 
-#suivante {
-    cursor: pointer;
-}
-
-#precedente {
-    cursor: pointer;
-}
-
-#images em[data-a] {
+#images em[data-a], #suivante, #precedente {
     cursor: pointer;
 }
 
@@ -26,4 +18,12 @@
 .nofav {
     background: url('nofav.png') no-repeat;
     display: block;
+}
+
+#utilisateurs > ul > li, #logins_suivants, #logins_precedents {
+    cursor: pointer;
+}
+
+.cc {
+    height: 20px;
 }

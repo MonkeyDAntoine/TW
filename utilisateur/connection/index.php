@@ -1,8 +1,8 @@
 <?php
 require_once "../../php/connectionBDD.php";
 
-$login = $_GET['login'];
-$mdp = $_GET['mdp'];
+$login = $_POST['login'];
+$mdp = $_POST['mdp'];
 
 $messages = validerLoginMotDePasse($login, $mdp);
 
@@ -23,10 +23,10 @@ if (empty($messages['erreurs'])) {
               utl_id AS id,
               utl_login AS \"login\"
             FROM utilisateurs
-            INNER JOIN favoris
+            LEFT JOIN favoris
             ON utilisateurs.utl_id = favoris.fav_id_utl
-            WHERE LOWER(utl_login) LIKE LOWER(:login)
-            AND utl_mdp LIKE :mdp
+            WHERE LOWER(utl_login) = LOWER(:login)
+            AND utl_mdp = :mdp
             ";
 
         $stmt = $pdo->prepare($auth);

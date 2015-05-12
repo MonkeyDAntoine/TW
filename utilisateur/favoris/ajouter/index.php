@@ -6,7 +6,7 @@ $path_vignette = $_GET['vignette'];
 
 
 if (!empty($auth) && !empty($path_vignette)) {
-    $id = 1;
+    $id = $auth['id'];
     $vignette = preg_replace("/$BASE_VIGNETTES\\//", '', $path_vignette, 1);
     if (!empty($id) && $id > 0 && !empty($vignette)) {
         $ajouter = "INSERT INTO favoris(fav_id_utl, fav_id_pho) VALUES (:id, (SELECT pho_id FROM photos WHERE pho_vignette LIKE :vignette))";
