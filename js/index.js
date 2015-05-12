@@ -100,7 +100,7 @@ function afficher(rep) {
                     });
                 }
             }
-            container.insertBefore(fav,infosSpan);
+            container.insertBefore(fav, infosSpan);
         }
 
         imgDiv.appendChild(container);
@@ -155,6 +155,43 @@ function afficherImages(opts) {
     ajax('GET', 'ws?' + param.join('&'), afficher);
 }
 
+var MAX_LOGIN_PAR_PAGE = 10;
+function afficherLogins(page_login) {
+    if (page_login == undefined || isNaN(page_login || page_login < 0)) {
+        page_login = 0;
+    }
+    var listeLogins = document.getElementById('utilisateurs');
+    var logins_suivants = document.getElementById('logins_suivants');
+    var logins_precedents = document.getElementById('logins_precedents');
+
+    ajax('GET', 'utilisateur/?limit=' + MAX_LOGIN_PAR_PAGE + '&from=' + (page_login * MAX_LOGIN_PAR_PAGE), function (resp) {
+        var logins = JSON.parse(resp);
+        var liste = document.createElement('ul');
+        for (var i in logins) {
+            var li = document.createElement('li');
+            li.innerHTML = logins[i];
+            liste.appendChild(li);
+            li.onclick = function () {
+                afficherImages({'collection': this.innerHTML});
+            }
+        }
+        listeLogins.innerHTML = '';
+        listeLogins.appendChild(liste);
+
+        if (logins.length < MAX_LOGIN_PAR_PAGE) {
+            logins_suivants.classList.add('cache');
+        }
+        else {
+            logins_suivants.classList.remove('cache');
+        }
+        if (page_login == 0) {
+            logins_precedents.classList.add('cache');
+        }
+        else {
+            logins_precedents.classList.remove('cache');
+        }
+    });
+}
 window.onload = function () {
 
     afficherImages();
@@ -244,6 +281,7 @@ window.onload = function () {
                     var $rep = JSON.parse(resp);
                     if ($rep['erreurs'].length == 0) {
                         $messages.innerHTML = 'inscription résussie veuillez vous connecter !';
+                        connectionForm.login.value = inscriptionForm.login.value;
                         inscriptionForm.login.value = '';
                         inscriptionForm.mdp.value = '';
                         inscriptionForm.mdpbis.value = '';
@@ -272,99 +310,41 @@ window.onload = function () {
         });
     }
 
+
+    var PAGE_LOGIN = 0;
+
     var listeLogins = document.getElementById('utilisateurs');
-    var limitLogin = 10;
-    var page_login = 1;
-
+    var logins_suivants = document.getElementById('logins_suivants');
+    var logins_precedents = document.getElementById('logins_precedents');
     if (listeLogins) {
-        var logins_suivants = document.getElementById('logins_suivants');
-        var logins_precedents = document.getElementById('logins_precedents');
-
+        afficherLogins();
         if (logins_suivants) {
             logins_suivants.onclick = function () {
-                page_login++;
-                ajax('GET', 'utilisateur/?limit=' + limitLogin + '&from=' + (page_login * limitLogin), function (resp) {
-                    var logins = JSON.parse(resp);
-                    var liste = document.createElement('ul');
-                    for (var i in logins) {
-                        var li = document.createElement('li');
-                        li.innerHTML = logins[i];
-                        liste.appendChild(li);
-                        li.onclick = function () {
-                            afficherImages({'collection': this.innerHTML});
-                        }
-                    }
-                    listeLogins.innerHTML = '';
-                    listeLogins.appendChild(liste);
-
-                    if (logins.length < limitLogin) {
-                        logins_suivants.classList.add('cache');
-                    }
-                    else {
-                        logins_suivants.classList.remove('cache');
-                    }
-                    if (page_login == 0) {
-                        logins_precedents.classList.add('cache');
-                    }
-                    else {
-                        logins_precedents.classList.remove('cache');
-                    }
-                });
+                PAGE_LOGIN++;
+                afficherLogins(PAGE_LOGIN);
             }
         }
-
 
         if (logins_precedents) {
-            logins_precedents.classList.add('cache');
             logins_precedents.onclick = function () {
-                page_login--;
-                if (page_login < 0) {
-                    page_login = 0;
-                }
-                ajax('GET', 'utilisateur/?limit=' + limitLogin + '&from=' + (page_login * limitLogin), function (resp) {
-                    var logins = JSON.parse(resp);
-                    var liste = document.createElement('ul');
-                    for (var i in logins) {
-                        var li = document.createElement('li');
-                        li.innerHTML = logins[i];
-                        liste.appendChild(li);
-                        li.onclick = function () {
-                            afficherImages({'collection': this.innerHTML});
-                        }
-                    }
-                    listeLogins.innerHTML = '';
-                    listeLogins.appendChild(liste);
-
-                    if (logins.length < limitLogin) {
-                        logins_suivants.classList.add('cache');
-                    }
-                    else {
-                        logins_suivants.classList.remove('cache');
-                    }
-                    if (page_login == 0) {
-                        logins_precedents.classList.add('cache');
-                    }
-                    else {
-                        logins_precedents.classList.remove('cache');
-                    }
-                });
+                PAGE_LOGIN--;
+                afficherLogins(PAGE_LOGIN);
             }
         }
+    }
 
-        ajax('GET', 'utilisateur/?limit=' + limitLogin, function (resp) {
-                var logins = JSON.parse(resp);
-                var liste = document.createElement('ul');
-                for (var i in logins) {
-                    var li = document.createElement('li');
-                    li.innerHTML = logins[i];
-                    liste.appendChild(li);
-                    li.onclick = function () {
-                        afficherImages({'collection': this.innerHTML});
-                    }
-                }
-                listeLogins.innerHTML = '';
-                listeLogins.appendChild(liste);
-            }
-        );
+    document.getElementById('afficherConnection').onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('connection').classList.remove('cache');
+        document.getElementById('inscription').classList.add('cache');
+        return false;
+    }
+
+
+    document.getElementById('afficherInscription').onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('connection').classList.add('cache');
+        document.getElementById('inscription').classList.remove('cache');
+        return false;
     }
 };

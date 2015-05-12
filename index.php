@@ -34,8 +34,9 @@ include "php/connectionBDD.php"
                 </label >
                 <input type = "submit" name = "submit" value = "Se connecter" />
             </form >
+            <a id="afficherInscription" href="">S\'inscrire</a>
         </div >
-        <div id = "inscription" >
+        <div id = "inscription" class="cache">
             <form method = "post" action = "utilisateur/inscription/" id = "inscriptionForm" >
                 <label >
         Login :
@@ -51,6 +52,7 @@ include "php/connectionBDD.php"
                 </label >
                 <input type = "submit" name = "submit" value = "S\'inscrire" />
             </form >
+            <a id="afficherConnection" href="">Se connecter</a>
         </div >';
     } ?>
 </div>
