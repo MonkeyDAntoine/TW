@@ -28,8 +28,8 @@ VALUES
 
 INSERT INTO photos (pho_vignette, pho_nom_auteur, pho_url_auteur, pho_url, pho_mime_type, pho_largeur, pho_hauteur, pho_type_licence, pho_titre)
 VALUES
-  ('Android_robot.png', 'Google', 'http://developer.android.com/distribute/tools/promote/brand.html', 'image/png',
-   'http://commons.wikimedia.org/wiki/File:Android_robot.png', '1024', '1218', '{1,0,0,1}', 'Logo Android'),
+  ('Android_robot.png', 'Google', 'http://developer.android.com/distribute/tools/promote/brand.html',
+   'http://commons.wikimedia.org/wiki/File:Android_robot.png', 'image/png', '1024', '1218', '{1,0,0,1}', 'Logo Android'),
   ('Android_green_figure.png', 'Dsimic', 'http://en.wikipedia.org/wiki/User:Dsimic', 'http://upload.wikimedia.org/wikipedia/commons/e/ee/Android_green_figure%2C_next_to_its_original_packaging.jpg', 'image/jpeg','1280', '960', '{1,0,0,1}', 'Figure android verte à côté de son package original'),
   ('android_warrior.png', 'richtaur', 'http://richtaur.deviantart.com/', 'http://fc07.deviantart.net/fs71/f/2011/253/b/6/html5_android_warrior_by_richtaur-d49g6vf.png', 'image/png','500', '500', '{1,0,0,1}', 'Guerrier Android HTML5'),
   ('android_chocolate.png', 'Polypous', 'http://polypous.deviantart.com/', 'http://fc00.deviantart.net/fs71/f/2014/280/7/b/android_love_chocolate_ii_by_polypous-d81yx0p.png', 'image/png','835', '771', '{1,0,0,1}', 'Android aime le chocolat'),
